@@ -2,30 +2,44 @@
 #include <fstream>
 
 #include "vec3.h"
+#include "ray.h"
 
-const int width = 200;
-const int height = 100;
-const int max_rgb_value = 255;
+vec3 color(const ray& r)
+{
+  vec3 unit_direction = unit_vector(r.direction());
+  float t = 0.5f*(unit_direction.y() + 1.0f);
+  return (1.0f-t)*vec3(1.0f, 1.0f, 1.0f) + t*vec3(0.5f, 0.7f, 1.0f);
+}
 
 void createPpm(const std::string &filename)
 {
+  const int width = 200;
+  const int height = 100;
+  const int max_rgb_value = 255;
+
   std::ofstream outf;
   outf.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+  vec3 lower_left_corner(-2.0f, -1.0f, -1.0f);
+  vec3 horizontal(4.0f, 0.0f, 0.0f);
+  vec3 vertical(0.0f, 2.0f, 0.0f);
+  vec3 origin(0.0f, 0.0f, 0.0f);
 
   try
   {
     outf.open(filename);
-
     outf << "P3\n" << width << " " << height << "\n" << max_rgb_value << "\n";
     for(int j = height - 1; j >= 0; --j)
     {
       for(int i = 0; i < width; ++i)
       {
-        vec3 col(float(i) / float(width), float(j) / float(height), 0.2f);
+        float u = float(i) / float(width);
+        float v = float(j) / float(height);
+        ray r(origin, lower_left_corner + u*horizontal + v*vertical);
+        vec3 col = color(r);
         int ir = int(255.99 * col.r());
         int ig = int(255.99 * col.g());
-        int ib = int(255.99 * col.b());
-
+        int ib = int(255.99 * col.b()); 
         outf << ir << " " << ig << " " << ib << "\n";
       }
     }

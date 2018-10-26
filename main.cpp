@@ -1,37 +1,26 @@
 #include <iostream>
 #include <fstream>
+#include <limits>
 
-#include "vec3.h"
+#include "Vec3.h"
 #include "ray.h"
+#include "sphere.h"
+#include "hitablelist.h"
 
-float hit_sphere(const vec3& center, float radius, const ray& r)
+
+Vec3 color(const Ray& r, HitableList world)
 {
-  vec3 oc = r.origin() - center;
-  float a = dot(r.direction(), r.direction());
-  float b = 2.0f * dot(oc, r.direction());
-  float c = dot(oc, oc) - radius*radius;
-  float discriminant = b*b - 4*a*c;
-
-  if(discriminant < 0)
-    return -1;
+  HitRecord rec;
+  if(world.hit(r, 0.0f, std::numeric_limits<float>::max(), rec))
+    return 0.5f*Vec3(rec.normal.x()+1, rec.normal.y()+1, rec.normal.z()+1);
   else
-    return (-b - sqrt(discriminant)) / (2.0f*a);
-}
-
-vec3 color(const ray& r)
-{
-  // Paint sphere (with normals)
-  float t = hit_sphere(vec3(0, 0, -1), 0.5f, r);
-  if(t > 0.0f)
   {
-    vec3 N = unit_vector(r.point_at_parameter(t) - vec3(0, 0, -1));
-    return 0.5f*vec3(N.x()+1, N.y()+1, N.z()+1);
+    // Paint background
+    Vec3 unit_direction = unit_vector(r.direction());
+    // Background fade
+    float t = 0.5f*(unit_direction.y() + 1.0f);
+    return (1.0f-t)*Vec3(1.0f, 1.0f, 1.0f) + t*Vec3(0.5f, 0.7f, 1.0f);
   }
-
-  vec3 unit_direction = unit_vector(r.direction());
-  // Background fade
-  t = 0.5f*(unit_direction.y() + 1.0f);
-  return (1.0f-t)*vec3(1.0f, 1.0f, 1.0f) + t*vec3(0.5f, 0.7f, 1.0f);
 }
 
 void createPpm(const std::string &filename)
@@ -40,14 +29,17 @@ void createPpm(const std::string &filename)
   const int height = 200;
   const int max_rgb_value = 255;
 
+  Vec3 lower_left_corner(-2.0f, -1.0f, -1.0f);
+  Vec3 horizontal(4.0f, 0.0f, 0.0f);
+  Vec3 vertical(0.0f, 2.0f, 0.0f);
+  Vec3 origin(0.0f, 0.0f, 0.0f);
+
+  HitableList world;
+  world.push_back(std::make_shared<Sphere>(Vec3(0, 0, -1), 0.5f));
+  world.push_back(std::make_shared<Sphere>(Vec3(0, -100.5f, -1), 100));
+
   std::ofstream outf;
   outf.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
-  vec3 lower_left_corner(-2.0f, -1.0f, -1.0f);
-  vec3 horizontal(4.0f, 0.0f, 0.0f);
-  vec3 vertical(0.0f, 2.0f, 0.0f);
-  vec3 origin(0.0f, 0.0f, 0.0f);
-
   try
   {
     outf.open(filename);
@@ -58,8 +50,10 @@ void createPpm(const std::string &filename)
       {
         float u = float(i) / float(width);
         float v = float(j) / float(height);
-        ray r(origin, lower_left_corner + u*horizontal + v*vertical);
-        vec3 col = color(r);
+        Ray r(origin, lower_left_corner + u*horizontal + v*vertical);
+
+        Vec3 p = r.point_at_parameter(2.0f);
+        Vec3 col = color(r, world);
         int ir = int(255.99 * col.r());
         int ig = int(255.99 * col.g());
         int ib = int(255.99 * col.b());

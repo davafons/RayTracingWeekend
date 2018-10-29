@@ -1,18 +1,22 @@
 #pragma once
 
+#include <memory>
+
 #include "hitable.h"
+#include "material.h"
 
 class Sphere : public Hitable
 {
 public:
   Sphere() = default;
-  Sphere(Vec3 cen, float r) : center(cen), radius(r) {};
+  Sphere(Vec3 cen, float r, std::shared_ptr<Material> m) : center(cen), radius(r), mat(m) {};
   bool hit(const Ray& r, float t_min, float t_max, HitRecord& rec) const
     override;
 
 private:
   Vec3 center;
   float radius;
+  std::shared_ptr<Material> mat;
 };
 
 
@@ -32,6 +36,7 @@ bool Sphere::hit(const Ray& r, float t_min, float t_max, HitRecord& rec) const
       rec.t = temp;
       rec.p = r.point_at_parameter(rec.t);
       rec.normal = (rec.p - center) / radius;
+      rec.mat = mat;
       return true;
     }
 
@@ -41,6 +46,7 @@ bool Sphere::hit(const Ray& r, float t_min, float t_max, HitRecord& rec) const
       rec.t = temp;
       rec.p = r.point_at_parameter(rec.t);
       rec.normal = (rec.p - center) / radius;
+      rec.mat = mat;
       return true;
     }
   }

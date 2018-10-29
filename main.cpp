@@ -7,24 +7,20 @@
 #include "ray.h"
 #include "sphere.h"
 #include "hitablelist.h"
+#include "lambertian.h"
+#include "metal.h"
 
-Vec3 random_in_unit_sphere()
-{
-  Vec3 p;
-  do
-    p = 2.0f * Vec3(drand48(), drand48(), drand48()) - Vec3(1, 1, 1);
-  while(p.squared_length() >= 1.0f);
-
-  return p;
-}
-
-Vec3 color(const Ray& r, HitableList world)
+Vec3 color(const Ray& r, HitableList world, int depth)
 {
   HitRecord rec;
   if(world.hit(r, 0.001f, std::numeric_limits<float>::max(), rec))
   {
-    Vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-    return 0.5f * color(Ray(rec.p, target-rec.p), world);
+    Ray scattered;
+    Vec3 attenuation;
+    if(depth < 50 && rec.mat->scatter(r, rec, attenuation, scattered))
+      return attenuation * color(scattered, world, depth+1);
+    else
+      return Vec3(0, 0, 0);
   }
   else
   {
@@ -44,8 +40,14 @@ void createPpm(const std::string &filename)
   const int max_rgb_value = 255;
 
   HitableList world;
-  world.push_back(std::make_shared<Sphere>(Vec3(0, 0, -1), 0.5f));
-  world.push_back(std::make_shared<Sphere>(Vec3(0, -100.5f, -1), 100));
+  world.push_back(std::make_shared<Sphere>(Vec3(0, 0, -1), 0.5f,
+        std::make_shared<Lambertian>(Vec3(0.8f, 0.3f, 0.3f))));
+  world.push_back(std::make_shared<Sphere>(Vec3(0, -100.5f, -1), 100,
+        std::make_shared<Lambertian>(Vec3(0.8f, 0.8f, 0.0f))));
+  world.push_back(std::make_shared<Sphere>(Vec3(1, 0, -1), 0.5f,
+        std::make_shared<Metal>(Vec3(0.8f, 0.6f, 0.2f), 1.0f)));
+  world.push_back(std::make_shared<Sphere>(Vec3(-1, 0, -1), 0.5f,
+        std::make_shared<Metal>(Vec3(0.8f, 0.8f, 0.8f), 0.3f)));
 
   Camera cam;
 
@@ -66,7 +68,7 @@ void createPpm(const std::string &filename)
           float v = float(j + drand48()) / float(height);
           Ray r = cam.getRay(u, v);
           Vec3 p = r.point_at_parameter(2.0f);
-          col += color(r, world);
+          col += color(r, world, 0);
         }
         col /= float(ns);
         col = Vec3(sqrt(col.r()), sqrt(col.g()), sqrt(col.b()));

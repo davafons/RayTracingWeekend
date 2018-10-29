@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <limits>
+#include <cmath>
 
 #include "camera.h"
 #include "vec3.h"
@@ -9,6 +10,7 @@
 #include "hitablelist.h"
 #include "lambertian.h"
 #include "metal.h"
+#include "dielectric.h"
 
 Vec3 color(const Ray& r, HitableList world, int depth)
 {
@@ -39,17 +41,25 @@ void createPpm(const std::string &filename)
   const int ns = 100;
   const int max_rgb_value = 255;
 
+  float R = cos(M_PI/4);
   HitableList world;
   world.push_back(std::make_shared<Sphere>(Vec3(0, 0, -1), 0.5f,
-        std::make_shared<Lambertian>(Vec3(0.8f, 0.3f, 0.3f))));
+        std::make_shared<Lambertian>(Vec3(0.3f, 0.3f, 0.8f))));
   world.push_back(std::make_shared<Sphere>(Vec3(0, -100.5f, -1), 100,
         std::make_shared<Lambertian>(Vec3(0.8f, 0.8f, 0.0f))));
   world.push_back(std::make_shared<Sphere>(Vec3(1, 0, -1), 0.5f,
         std::make_shared<Metal>(Vec3(0.8f, 0.6f, 0.2f), 1.0f)));
-  world.push_back(std::make_shared<Sphere>(Vec3(-1, 0, -1), 0.5f,
-        std::make_shared<Metal>(Vec3(0.8f, 0.8f, 0.8f), 0.3f)));
+  world.push_back(std::make_shared<Sphere>(Vec3(-1, 0, -1), 0.50f,
+        std::make_shared<Dielectric>(1.5f)));
+  world.push_back(std::make_shared<Sphere>(Vec3(-1, 0, -1), -0.45f,
+        std::make_shared<Dielectric>(1.5f)));
 
-  Camera cam;
+  Vec3 lookfrom(3, 3, 2);
+  Vec3 lookat(0, 0, -1);
+  float dist_to_focus = (lookfrom - lookat).length();
+  float aperture = 2.0f;
+  Camera cam(lookfrom, lookat, Vec3(0, 1, 0), 20, float(width)/float(height),
+      aperture, dist_to_focus);
 
   std::ofstream outf;
   outf.exceptions(std::ifstream::failbit | std::ifstream::badbit);

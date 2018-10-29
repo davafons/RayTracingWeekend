@@ -2,17 +2,30 @@
 #include <fstream>
 #include <limits>
 
-#include "Vec3.h"
+#include "camera.h"
+#include "vec3.h"
 #include "ray.h"
 #include "sphere.h"
 #include "hitablelist.h"
 
+Vec3 random_in_unit_sphere()
+{
+  Vec3 p;
+  do
+    p = 2.0f * Vec3(drand48(), drand48(), drand48()) - Vec3(1, 1, 1);
+  while(p.squared_length() >= 1.0f);
+
+  return p;
+}
 
 Vec3 color(const Ray& r, HitableList world)
 {
   HitRecord rec;
-  if(world.hit(r, 0.0f, std::numeric_limits<float>::max(), rec))
-    return 0.5f*Vec3(rec.normal.x()+1, rec.normal.y()+1, rec.normal.z()+1);
+  if(world.hit(r, 0.001f, std::numeric_limits<float>::max(), rec))
+  {
+    Vec3 target = rec.p + rec.normal + random_in_unit_sphere();
+    return 0.5f * color(Ray(rec.p, target-rec.p), world);
+  }
   else
   {
     // Paint background
@@ -25,18 +38,16 @@ Vec3 color(const Ray& r, HitableList world)
 
 void createPpm(const std::string &filename)
 {
-  const int width = 400;
-  const int height = 200;
+  const int width = 300;
+  const int height = 150;
+  const int ns = 100;
   const int max_rgb_value = 255;
-
-  Vec3 lower_left_corner(-2.0f, -1.0f, -1.0f);
-  Vec3 horizontal(4.0f, 0.0f, 0.0f);
-  Vec3 vertical(0.0f, 2.0f, 0.0f);
-  Vec3 origin(0.0f, 0.0f, 0.0f);
 
   HitableList world;
   world.push_back(std::make_shared<Sphere>(Vec3(0, 0, -1), 0.5f));
   world.push_back(std::make_shared<Sphere>(Vec3(0, -100.5f, -1), 100));
+
+  Camera cam;
 
   std::ofstream outf;
   outf.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -48,12 +59,17 @@ void createPpm(const std::string &filename)
     {
       for(int i = 0; i < width; ++i)
       {
-        float u = float(i) / float(width);
-        float v = float(j) / float(height);
-        Ray r(origin, lower_left_corner + u*horizontal + v*vertical);
-
-        Vec3 p = r.point_at_parameter(2.0f);
-        Vec3 col = color(r, world);
+        Vec3 col(0, 0, 0);
+        for(int s = 0; s < ns; ++s)
+        {
+          float u = float(i + drand48()) / float(width);
+          float v = float(j + drand48()) / float(height);
+          Ray r = cam.getRay(u, v);
+          Vec3 p = r.point_at_parameter(2.0f);
+          col += color(r, world);
+        }
+        col /= float(ns);
+        col = Vec3(sqrt(col.r()), sqrt(col.g()), sqrt(col.b()));
         int ir = int(255.99 * col.r());
         int ig = int(255.99 * col.g());
         int ib = int(255.99 * col.b());

@@ -3,13 +3,13 @@
 #include <vector>
 #include <memory>
 
-#include "Hitable.h"
+#include "hitable.h"
 
 class HitableList : public Hitable
 {
 public:
   HitableList() = default;
-  HitableList(std::vector<std::shared_ptr<Hitable>> l) : list(l) {}
+  explicit HitableList(std::vector<std::shared_ptr<Hitable>> l) : list(l) {}
   bool hit(const Ray&r, float t_min, float t_max, HitRecord& rec) const
     override;
 

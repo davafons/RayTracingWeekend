@@ -1,27 +1,11 @@
-#pragma once
+#include "sphere.h"
 
-#include <memory>
-
-#include "hitable.h"
-#include "material.h"
-
-class Sphere : public Hitable {
-public:
-    Sphere() = default;
-
-    Sphere(Vec3 cen, float r, const std::shared_ptr<Material>& m)
-        : center(cen)
-        , radius(r)
-        , mat(m){};
-
-    bool hit(const Ray& r, float t_min, float t_max, HitRecord& rec) const
-        override;
-
-private:
-    Vec3 center;
-    float radius;
-    std::shared_ptr<Material> mat;
-};
+Sphere::Sphere(Vec3 cen, float r, const std::shared_ptr<Material>& m)
+    : center(cen)
+    , radius(r)
+    , mat(m)
+{
+}
 
 bool Sphere::hit(const Ray& r, float t_min, float t_max, HitRecord& rec) const
 {

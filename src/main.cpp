@@ -3,14 +3,14 @@
 #include <iostream>
 #include <limits>
 
-#include "camera.h"
-#include "dielectric.h"
-#include "hitablelist.h"
-#include "lambertian.h"
-#include "metal.h"
-#include "ray.h"
-#include "sphere.h"
-#include "vec3.h"
+#include "camera/camera.h"
+#include "hitable/hitablelist.h"
+#include "hitable/ray.h"
+#include "material/dielectric.h"
+#include "material/lambertian.h"
+#include "material/metal.h"
+#include "math/vec3.h"
+#include "primitive/sphere.h"
 
 Vec3 color(const Ray& r, HitableList world, int depth)
 {
@@ -33,9 +33,9 @@ Vec3 color(const Ray& r, HitableList world, int depth)
 
 void createPpm(const std::string& filename)
 {
-    const int width = 1200;
-    const int height = 800;
-    const int ns = 50;
+    const int width = 400;
+    const int height = 250;
+    const int ns = 10;
     const int max_rgb_value = 255;
 
     HitableList world;

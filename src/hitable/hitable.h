@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "math/vec3.h"
 #include "ray.h"
 
 class Material;
@@ -17,6 +18,5 @@ class Hitable {
 public:
     virtual ~Hitable() = default;
 
-    virtual bool hit(
-        const Ray& r, float t_min, float t_max, HitRecord& rec) const = 0;
+    virtual bool hit(const Ray& r, float t_min, float t_max, HitRecord& rec) const = 0;
 };

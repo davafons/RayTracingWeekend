@@ -5,12 +5,19 @@ CXX = g++
 # Commands
 MKDIR = mkdir
 RM = rm
+FIND_DIR = $(shell find $(1) -type d)
+FIND_FILES = $(shell find $(1) -type f $(2))
 
-SLASH = /
 # Correct slash for commands depending of OS
+SLH = /
+
+# System specific settings
 ifeq ($(OS),Windows_NT)
 	RM = del
-	SLASH = \\
+	SLH = \\
+	EXE = exe
+	FIND_DIR = $(shell dir /s /b /a:d $(1))
+	FIND_FILES = $(shell dir /s /b /a-d $(1)$(2))
 endif
 
 
@@ -19,20 +26,20 @@ SRCDIR = src
 OBJDIR = obj
 BINDIR = bin
 
-VPATH = $(SRCDIR)/ $(shell find $(SRCDIR)/* -type d)
+VPATH = $(SRCDIR)/ $(call FIND_DIR, $(SRCDIR)$(SLH)*)
 
 # Target name
-TARGET := $(BINDIR)/raytracer.out
+TARGET := $(BINDIR)$(SLH)raytracer.$(EXE)
 
 # Source and object files
-c_files := $(shell find $(SRCDIR)/ -type f -name '*.c')
-cxx_files := $(shell find $(SRCDIR)/ -type f -name '*.cpp')
+c_files := $(call FIND_FILES, $(SRCDIR)$(SLH),*.c)
+cxx_files := $(call FIND_FILES, $(SRCDIR)$(SLH),*.cpp)
 src := $(c_files) $(cxx_files)
 obj := $(addprefix $(OBJDIR)/, $(notdir $(addsuffix .o, $(basename $(src)))))
 
 
 # Include and Library paths
-INCLUDE := -I$(CURDIR)/src
+INCLUDE := -I$(CURDIR)$(SLH)$(SRCDIR)
 LIB :=
 
 # Compiler and Linker flags
@@ -67,7 +74,7 @@ $(OBJDIR)/%.o : %.cpp
 # Clean executable and objects
 .PHONY : clean
 clean :
-	 $(RM) $(subst /,$(SLASH), $(TARGET)) $(subst /,$(SLASH), $(obj))
+	 $(RM) $(subst /,$(SLH), $(TARGET)) $(subst /,$(SLH), $(obj))
 
 # Create directories if necessary
 .PHONY : directories

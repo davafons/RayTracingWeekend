@@ -1,6 +1,7 @@
 #pragma once
 
 #include "material.h"
+#include "math/vec3.h"
 
 class Lambertian : public Material {
 public:

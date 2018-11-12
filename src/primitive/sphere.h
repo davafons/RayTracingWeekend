@@ -3,7 +3,8 @@
 #include <memory>
 
 #include "hitable/hitable.h"
-#include "material/material.h"
+
+class Material;
 
 class Sphere : public Hitable {
 public:

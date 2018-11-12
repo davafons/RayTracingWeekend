@@ -1,4 +1,5 @@
 #include "dielectric.h"
+#include "hitable/hitable.h"
 
 Dielectric::Dielectric(float ri)
     : ref_idx(ri)
@@ -30,7 +31,7 @@ bool Dielectric::scatter(const Ray& r_in, const HitRecord& rec, Vec3& attenuatio
     else
         reflect_prob = 1.0f;
 
-    if (drand48() < reflect_prob)
+    if (float(rand())/RAND_MAX < reflect_prob)
         scattered = Ray(rec.p, reflected);
     else
         scattered = Ray(rec.p, refracted);

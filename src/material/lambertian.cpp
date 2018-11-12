@@ -1,4 +1,5 @@
 #include "lambertian.h"
+#include "hitable/hitable.h"
 
 Lambertian::Lambertian(const Vec3& a)
     : albedo(a)

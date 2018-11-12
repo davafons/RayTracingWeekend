@@ -1,8 +1,8 @@
 #pragma once
 
-#include "hitable/hitable.h"
-#include "hitable/ray.h"
-#include "math/vec3.h"
+class HitRecord;
+class Vec3;
+class Ray;
 
 class Material {
 public:

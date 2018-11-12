@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include "camera.h"
+#include "hitable/ray.h"
 
 Camera::Camera(const Vec3& lookfrom, const Vec3& lookat, const Vec3& vup, float vfov, float aspect, float aperture,
     float focus_dist)
@@ -32,7 +33,7 @@ Vec3 Camera::random_in_unit_disk()
 {
     Vec3 p;
     do
-        p = 2.0f * Vec3(drand48(), drand48(), 0) - Vec3(1, 1, 0);
+        p = 2.0f * Vec3(float(rand())/RAND_MAX, float(rand())/RAND_MAX, 0) - Vec3(1, 1, 0);
     while (dot(p, p) >= 1.0f);
 
     return p;

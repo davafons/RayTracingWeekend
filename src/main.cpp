@@ -9,8 +9,18 @@
 #include "material/dielectric.h"
 #include "material/lambertian.h"
 #include "material/metal.h"
-#include "math/vec3.h"
 #include "primitive/sphere.h"
+
+const int width = 200;
+const int height = 100;
+const int ns = 5;
+const int max_rgb_value = 255;
+
+Vec3 lookfrom(13, 2, 3);
+Vec3 lookat(0, 0, 0);
+float dist_to_focus = 10.0f;
+float aperture = 0.1f;
+
 
 Vec3 color(const Ray& r, HitableList world, int depth)
 {
@@ -31,13 +41,8 @@ Vec3 color(const Ray& r, HitableList world, int depth)
     }
 }
 
-void createPpm(const std::string& filename)
+HitableList randomWorld()
 {
-    const int width = 400;
-    const int height = 250;
-    const int ns = 10;
-    const int max_rgb_value = 255;
-
     HitableList world;
 
     world.push_back(std::make_shared<Sphere>(
@@ -47,30 +52,39 @@ void createPpm(const std::string& filename)
 
     for (int a = -11; a < 11; ++a) {
         for (int b = -11; b < 11; ++b) {
-            float choose_mat = drand48();
-            Vec3 center(a + 0.9f * drand48(), 0.2f, b + 0.9f * drand48());
+            float choose_mat = float(rand())/RAND_MAX;
+            Vec3 center(a + 0.9f * float(rand())/RAND_MAX, 0.2f, b + 0.9f * float(rand())/RAND_MAX);
             if ((center - Vec3(4, 0.2f, 0)).length() > 0.9f) {
                 if (choose_mat < 0.8f) // Diffuse
                     world.push_back(std::make_shared<Sphere>(
                         center,
                         0.2f,
-                        std::make_shared<Lambertian>(Vec3(drand48() * drand48(),
-                            drand48() * drand48(),
-                            drand48() * drand48()))));
+                        std::make_shared<Lambertian>(Vec3(float(rand())/RAND_MAX * float(rand())/RAND_MAX,
+                            float(rand())/RAND_MAX * float(rand())/RAND_MAX,
+                            float(rand())/RAND_MAX * float(rand())/RAND_MAX))));
                 else if (choose_mat < 0.95f) // Metal
                     world.push_back(std::make_shared<Sphere>(
                         center,
                         0.2f,
-                        std::make_shared<Metal>(Vec3(0.5f * (1 + drand48()),
-                                                    0.5f * (1 + drand48()),
-                                                    0.5f * (1 + drand48())),
-                            0.5f * drand48())));
+                        std::make_shared<Metal>(Vec3(0.5f * (1 + float(rand())/RAND_MAX),
+                                                    0.5f * (1 + float(rand())/RAND_MAX),
+                                                    0.5f * (1 + float(rand())/RAND_MAX)),
+                            0.5f * float(rand())/RAND_MAX)));
                 else // Glass
                     world.push_back(std::make_shared<Sphere>(
                         center, 0.2f, std::make_shared<Dielectric>(1.5f)));
             }
         }
     }
+
+    return world;
+}
+
+
+void createPpm(const std::string& filename)
+{
+    /// World settings
+    HitableList world = randomWorld();
 
     world.push_back(std::make_shared<Sphere>(
         Vec3(0, 1, 0), 1.0f, std::make_shared<Dielectric>(1.5f)));
@@ -85,32 +99,25 @@ void createPpm(const std::string& filename)
 
     std::cout << "-- World created" << std::endl;
 
-    Vec3 lookfrom(13, 2, 3);
-    Vec3 lookat(0, 0, 0);
-    float dist_to_focus = 10.0f;
-    float aperture = 0.1f;
-    Camera cam(lookfrom,
-        lookat,
-        Vec3(0, 1, 0),
-        20,
-        float(width) / float(height),
-        aperture,
-        dist_to_focus);
 
+    // Camera settings
+    Camera cam(lookfrom, lookat, Vec3(0, 1, 0), 20, float(width) / float(height), aperture, dist_to_focus);
+
+
+    // File creation
     std::ofstream outf;
     outf.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     try {
         outf.open(filename);
-        outf << "P3\n"
-             << width << " " << height << "\n"
-             << max_rgb_value << "\n";
+        outf << "P3\n" << width << " " << height << "\n" << max_rgb_value << "\n";
+
         for (int j = height - 1; j >= 0; --j) {
             std::cout << j << std::endl;
             for (int i = 0; i < width; ++i) {
                 Vec3 col(0, 0, 0);
                 for (int s = 0; s < ns; ++s) {
-                    float u = float(i + drand48()) / float(width);
-                    float v = float(j + drand48()) / float(height);
+                    float u = float(i + float(rand())/RAND_MAX) / float(width);
+                    float v = float(j + float(rand())/RAND_MAX) / float(height);
                     Ray r = cam.getRay(u, v);
                     // Vec3 p = r.point_at_parameter(2.0f);    // Unused?
                     col += color(r, world, 0);

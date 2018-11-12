@@ -1,4 +1,5 @@
 #include "metal.h"
+#include "hitable/hitable.h"
 
 Metal::Metal(const Vec3& a, float f)
     : albedo(a)

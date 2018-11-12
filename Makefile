@@ -6,12 +6,13 @@ CXX = g++
 MKDIR = mkdir
 RM = rm
 FIND_DIR = $(shell find $(1) -type d)
-FIND_FILES = $(shell find $(1) -type f $(2))
+FIND_FILES = $(shell find $(1) -type f -name $(2))
 
-# Correct slash for commands depending of OS
+# System specific
 SLH = /
+EXE = out
 
-# System specific settings
+# Windows settings
 ifeq ($(OS),Windows_NT)
 	RM = del
 	SLH = \\
@@ -50,6 +51,7 @@ LDFLAGS := $(LIB)
 LDLIBS =
 
 
+
 ############### RULES #################
 
 # Linking
@@ -67,6 +69,7 @@ $(OBJDIR)/%.o : %.c
 # Rule for .cpp files compilation
 $(OBJDIR)/%.o : %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
+
 
 
 ############### PHONY #################

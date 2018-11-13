@@ -1,13 +1,13 @@
 #include "sphere.h"
 
-Sphere::Sphere(Vec3 cen, float r, const std::shared_ptr<Material> &m)
-    : center(cen), radius(r), mat(m) {}
+Sphere::Sphere(Vec3 center, float radius, const std::shared_ptr<Material> &mat)
+    : center_(center), radius_(radius), mat_(mat) {}
 
 bool Sphere::hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
-  Vec3 oc = r.origin() - center;
+  Vec3 oc = r.origin() - center_;
   float a = dot(r.direction(), r.direction());
   float b = dot(oc, r.direction());
-  float c = dot(oc, oc) - radius * radius;
+  float c = dot(oc, oc) - radius_ * radius_;
   float discriminant = b * b - a * c;
 
   if (discriminant > 0) {
@@ -15,8 +15,8 @@ bool Sphere::hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
     if (temp < t_max && temp > t_min) {
       rec.t = temp;
       rec.p = r.point_at_parameter(rec.t);
-      rec.normal = (rec.p - center) / radius;
-      rec.mat = mat;
+      rec.normal = (rec.p - center_) / radius_;
+      rec.mat = mat_;
       return true;
     }
 
@@ -24,8 +24,8 @@ bool Sphere::hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
     if (temp < t_max && temp > t_min) {
       rec.t = temp;
       rec.p = r.point_at_parameter(rec.t);
-      rec.normal = (rec.p - center) / radius;
-      rec.mat = mat;
+      rec.normal = (rec.p - center_) / radius_;
+      rec.mat = mat_;
       return true;
     }
   }

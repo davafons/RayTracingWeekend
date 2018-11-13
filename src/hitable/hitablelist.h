@@ -13,9 +13,9 @@ public:
   bool hit(const Ray &r, float t_min, float t_max,
            HitRecord &rec) const override;
 
-  void push_back(std::shared_ptr<Hitable> obj) { list.push_back(obj); }
-  void pop_back() { list.pop_back(); }
+  void push_back(std::shared_ptr<Hitable> obj) { list_.push_back(obj); }
+  void pop_back() { list_.pop_back(); }
 
 private:
-  std::vector<std::shared_ptr<Hitable>> list;
+  std::vector<std::shared_ptr<Hitable>> list_;
 };

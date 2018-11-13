@@ -1,7 +1,6 @@
-#include "material.h"
 #include "math/math.h"
 
-Vec3 Material::random_in_unit_sphere() {
+Vec3 Math::random_in_unit_sphere() {
   Vec3 p;
   do
     p = 2.0f * Vec3(Math::drand48(), Math::drand48(), Math::drand48()) -
@@ -11,11 +10,11 @@ Vec3 Material::random_in_unit_sphere() {
   return p;
 }
 
-Vec3 Material::reflect(const Vec3 &v, const Vec3 &n) {
+Vec3 Math::reflect(const Vec3 &v, const Vec3 &n) {
   return v - 2 * dot(v, n) * n;
 }
 
-bool Material::refract(const Vec3 &v, const Vec3 &n, float ni_over_nt,
+bool Math::refract(const Vec3 &v, const Vec3 &n, float ni_over_nt,
                        Vec3 &refracted) {
   Vec3 uv = unit_vector(v);
   float dt = dot(uv, n);
@@ -28,7 +27,7 @@ bool Material::refract(const Vec3 &v, const Vec3 &n, float ni_over_nt,
     return false;
 }
 
-float Material::schlick(float cosine, float ref_idx) {
+float Math::schlick(float cosine, float ref_idx) {
   float r0 = (1 - ref_idx) / (1 + ref_idx);
   r0 = r0 * r0;
   return r0 + (1 - r0) * pow((1 - cosine), 5);

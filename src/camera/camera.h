@@ -15,10 +15,10 @@ private:
   Vec3 random_in_unit_disk();
 
 private:
-  Vec3 origin;
-  Vec3 lower_left_corner;
-  Vec3 horizontal;
-  Vec3 vertical;
-  Vec3 u, v, w;
-  float lens_radius;
+  Vec3 origin_;
+  Vec3 lower_left_corner_;
+  Vec3 horizontal_;
+  Vec3 vertical_;
+  Vec3 u_, v_, w_;
+  float lens_radius_;
 };
